@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import os
 import json
+from gemini_generation import gemini_generation
 
 allergies = []
 ALLERGIES_FILE = ''
@@ -54,7 +55,7 @@ def remove_allergy(item: str):
 @app.post("/upload-image/")
 async def upload_image(file: UploadFile = File(...)):
     image_bytes = await file.read()
-    result = proc_img(image_bytes)
+    result = gemini_generation(image_bytes, allergens=allergies)
     return JSONResponse(content=result)
 
 
