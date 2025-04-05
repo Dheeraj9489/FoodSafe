@@ -85,7 +85,7 @@ def remove_allergy(name: str):
 @app.post("/upload-image/")
 async def upload_image(file: UploadFile = File(...)):
     image_bytes = await file.read()
-    result = gemini_generation(image_bytes, allergens=allergies)
+    result = gemini_generation(image_bytes, allergens=get_all_allergens())
     return JSONResponse(content=result)
 
 
