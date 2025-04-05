@@ -1,9 +1,6 @@
-from typing import Union
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
-from PIL import Image
 from contextlib import asynccontextmanager
-import io
 import os
 import json
 
@@ -53,12 +50,6 @@ def remove_allergy(item: str):
     save_allergies()
     return {"message": f"Removed allergy: {item}"}
 
-
-def proc_img(image_bytes: bytes):
-    image = Image.open(io.BytesIO(image_bytes))
-    # GEMINI
-    width, height = image.size
-    return {"width": width, "height": height}
 
 @app.post("/upload-image/")
 async def upload_image(file: UploadFile = File(...)):
