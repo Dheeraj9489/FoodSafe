@@ -3,3 +3,4 @@ python-multipart
 fastapi[standard]
 Pillow
 google-genai
+deep-translator

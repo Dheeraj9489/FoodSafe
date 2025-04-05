@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 import os
 import json
 from gemini_generation import gemini_generation
+from deep_translator import GoogleTranslator
 
 allergies = []
 data = {
@@ -11,11 +12,15 @@ data = {
     "categories": {}
 }
 ALLERGIES_FILE = ''
+last_maybe_allergies = []
+last_food_name = ""
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global data
     global ALLERGIES_FILE
+    global last_maybe_allergies
+    global last_food_name
 
     ALLERGIES_FILE = os.path.join("server", "data", "allergies.json")
 
@@ -86,10 +91,17 @@ def remove_allergy(name: str):
 async def upload_image(file: UploadFile = File(...)):
     image_bytes = await file.read()
     result = gemini_generation(image_bytes, allergens=allergies)
+    last_maybe_allergies = result['maybe']
+    last_food_name = result['food_name']
     return JSONResponse(content=result)
 
 
-
+# text to speech translation stuff
+@app.post("/translate/{language}")
+def text_to_speech(language: str):
+    text = f"Does this {last_food_name} contain any of these: {" ,".join(last_maybe_allergies)}."
+    translation = GoogleTranslator(source='en', target=language).translate(text)
+    return translation
 
 
 # @app.get("/image/{item_id}")
