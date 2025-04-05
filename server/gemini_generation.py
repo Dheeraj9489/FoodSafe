@@ -60,8 +60,8 @@ def gemini_generation(image, allergens):
     for i in allergen_list:
         temp = i.split(',')
         if temp[1] in result:
-            result[temp[1]].append(temp[0])
+            result[temp[1].strip()].append(temp[0].strip())
         else:
-            result[temp[1]]  = [temp[0]]
+            result[temp[1].strip()]  = [temp[0].strip()]
 
     return result

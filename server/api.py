@@ -19,8 +19,6 @@ last_food_name = ""
 async def lifespan(app: FastAPI):
     global data
     global ALLERGIES_FILE
-    global last_maybe_allergies
-    global last_food_name
 
     ALLERGIES_FILE = os.path.join("server", "data", "allergies.json")
 
@@ -89,6 +87,8 @@ def remove_allergy(name: str):
 
 @app.post("/upload-image/")
 async def upload_image(file: UploadFile = File(...)):
+    global last_maybe_allergies
+    global last_food_name
     image_bytes = await file.read()
     result = gemini_generation(image_bytes, allergens=allergies)
     last_maybe_allergies = result['maybe']
@@ -99,11 +99,6 @@ async def upload_image(file: UploadFile = File(...)):
 # text to speech translation stuff
 @app.post("/translate/{language}")
 def text_to_speech(language: str):
-    text = f"Does this {last_food_name} contain any of these: {" ,".join(last_maybe_allergies)}."
+    text = f"Does this {last_food_name} contain any of these: {', '.join(last_maybe_allergies)}?"
     translation = GoogleTranslator(source='en', target=language).translate(text)
     return translation
-
-
-# @app.get("/image/{item_id}")
-# def read_item(item_id: int, q: Union[str, None] = None ):
-#     return {"item_id": item_id, "q": q}
