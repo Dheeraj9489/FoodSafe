@@ -1,0 +1,6 @@
+foodsafe/
+.env
+*.jpg
+*.jpeg
+*.png
+*.ipynb
