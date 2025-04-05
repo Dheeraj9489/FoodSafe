@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Image, Platform } from 'react-native';
 import { getAllergies } from '@/constants/api';
-
+import { useFocusEffect } from '@react-navigation/native';
 import { Collapsible } from '@/components/Collapsible';
 import { ExternalLink } from '@/components/ExternalLink';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -11,18 +11,20 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 
 export default function TabTwoScreen() {
     const [allergies, setAllergies] = useState<string[]>([]);
-    useEffect(() => {
-        const fetchData = async () => {
+    useFocusEffect(
+        useCallback(() => {
+          const fetchData = async () => {
             try {
-                const data = await getAllergies();
-                setAllergies(data); // store in local state
+              const data = await getAllergies();
+              setAllergies(data); // store in local state
             } catch (error) {
-                console.error('Failed to fetch allergies:', error);
+              console.error('Failed to fetch allergies:', error);
             }
-        };
-
-        fetchData();
-    }, []);
+          };
+      
+          fetchData();
+        }, []) // deps: put state/props here if needed
+      );
 
     return (
         <ParallaxScrollView

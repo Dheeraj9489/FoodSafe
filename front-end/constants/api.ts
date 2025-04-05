@@ -1,5 +1,5 @@
 //const BASE_URL = 'http://10.108.29.140:8000'; // Replace with your actual IP
-const BASE_URL = 'https://3685-2001-49d0-8512-1-a1a9-8b8a-db04-c24.ngrok-free.app';
+const BASE_URL = 'https://6445-2001-49d0-8512-1-715c-9826-b548-24b2.ngrok-free.app'; // change to your
 
 export const getAllergies = async () => {
     const res = await fetch(`${BASE_URL}/get-allergies/`);
