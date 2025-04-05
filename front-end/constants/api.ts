@@ -34,3 +34,8 @@ export const uploadImage = async (fileUri: string) => {
 
     return res.json();
 };
+
+export const translation = async (language: string) => {
+    const res = await fetch( `${BASE_URL}/translate/${language}`, {method: 'POST'} );
+    return res.json();
+};
