@@ -1,7 +1,7 @@
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useState } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { background } from '@/constants/Colors';
+//import { background } from '@/constants/Colors';
 
 export default function HomeScreen() {
     const [facing, setFacing] = useState<CameraType>('back');
@@ -68,7 +68,6 @@ const styles = StyleSheet.create({
     },
     text: {
         fontSize: 24,
-        fontWeight: 'bold',
         fontWeight: 'bold',
         color: 'white',
     },

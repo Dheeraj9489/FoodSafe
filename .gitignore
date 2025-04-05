@@ -3,6 +3,7 @@ server/data/*
 server/data
 foodsafe/
 .env
+.idea/
 *.jpg
 *.jpeg
 *.png
