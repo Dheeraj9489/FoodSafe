@@ -6,6 +6,7 @@ import json
 from gemini_generation import gemini_generation
 from deep_translator import GoogleTranslator
 from google.cloud import texttospeech
+import base64
 
 allergies = []
 data = {
@@ -91,7 +92,7 @@ async def upload_image(file: UploadFile = File(...)):
     global last_maybe_allergies
     global last_food_name
     image_bytes = await file.read()
-    result = gemini_generation(image_bytes, allergens=allergies)
+    result = gemini_generation(image_bytes, allergens=get_all_allergens())
     last_maybe_allergies = result['maybe']
     last_food_name = result['food_name']
     return JSONResponse(content=result)
@@ -104,7 +105,7 @@ def text_to_speech(language: str):
     text = f"Does this {last_food_name} contain any of these: {" ,".join(last_maybe_allergies)}."
     supported_langs = GoogleTranslator().get_supported_languages(True)
     translation = GoogleTranslator(source='en', target=language).translate(text)
-
+    print("translation done")
     # text to speech
     client = texttospeech.TextToSpeechClient()
 
@@ -127,13 +128,18 @@ def text_to_speech(language: str):
     response = client.synthesize_speech(
         input=synthesis_input, voice=voice, audio_config=audio_config
     )
-    # output_path = "output.mp3"
+    output_path = "output.mp3"
     # # The response's audio_content is binary.
-    # with open(output_path, "wb") as out:
-    #     # Write the response to the output file.
-    #     out.write(response.audio_content)
-    #     print('Audio content written to file "output.mp3"')
-    return translation, response
+    with open(output_path, "wb") as out:
+        # Write the response to the output file.
+        out.write(response.audio_content)
+        print('Audio content written to file "output.mp3"')
+    audio_base64 = base64.b64encode(response.audio_content).decode('utf-8')
+
+    return {
+        'translation': translation,
+        'audio': audio_base64
+    }
 
 
 # @app.get("/image/{item_id}")
