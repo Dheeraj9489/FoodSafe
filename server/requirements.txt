@@ -1,1 +1,4 @@
-spoonacular==3.0
+fastapi
+python-multipart
+fastapi[standard]
+Pillow
