@@ -40,12 +40,15 @@ def save_allergies():
     with open(ALLERGIES_FILE, 'w') as f:
         json.dump(data, f)
 
-@app.get("/get-allergies/")
 def get_all_allergens():
     allergens = set(data["allergies"])
     for item in data["categories"].values():
         allergens.update(item)
     return allergens
+
+@app.get("/get-allergies/")
+def get_all_allergens_endpoint():
+    return {"allergies": list(get_all_allergens())}
 
 # individual allergies
 @app.post("/add-allergy/{item}")
