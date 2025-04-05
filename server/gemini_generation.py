@@ -33,7 +33,6 @@ def gemini_generation(image, allergens):
     )
 
     prompt = """Does the food in this image contain these allergens:\n""" + ",".join(allergens) + ".\nFor each allergen give it rating of yes, maybe or no. Yes means that the food does contain the allergen, maybe means you aren't sure, no means that the food does not contain the allergen. Make the rating in the format of allergen name, rating. Also give me the name of the food itself"
-
     
     client = genai.Client(api_key=os.getenv("GEMINI_KEY"))
     response = client.models.generate_content(
@@ -60,8 +59,8 @@ def gemini_generation(image, allergens):
     for i in allergen_list:
         temp = i.split(',')
         if temp[1] in result:
-            result[temp[1]].append(temp[0])
+            result[temp[1].strip()].append(temp[0].strip())
         else:
-            result[temp[1]]  = [temp[0]]
+            result[temp[1].strip()]  = [temp[0].strip()]
 
     return result
