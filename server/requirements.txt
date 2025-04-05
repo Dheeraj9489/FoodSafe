@@ -2,3 +2,4 @@ fastapi
 python-multipart
 fastapi[standard]
 Pillow
+google-genai
