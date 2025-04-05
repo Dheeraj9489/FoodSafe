@@ -4,3 +4,4 @@ fastapi[standard]
 Pillow
 google-genai
 deep-translator
+google-cloud-texttospeech
