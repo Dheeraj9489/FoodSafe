@@ -1,4 +1,3 @@
-
 */__pycache__/
 server/data/*
 server/data
@@ -8,4 +7,3 @@ foodsafe/
 *.jpeg
 *.png
 *.ipynb
-
