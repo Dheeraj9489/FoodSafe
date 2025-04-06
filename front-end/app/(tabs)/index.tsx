@@ -1,15 +1,50 @@
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useRef, useState } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { uploadImage } from '@/constants/api'; // Adjust the import path as necessary
+import { Button, StyleSheet, Text, TouchableOpacity, View, Animated, Dimensions, PanResponder } from 'react-native';
+import { uploadImage } from '@/constants/api';
 //import { background } from '@/constants/Colors';
+
+const screenHeight = Dimensions.get('window').height;
 
 export default function HomeScreen() {
     const [facing, setFacing] = useState<CameraType>('back');
     const [permission, requestPermission] = useCameraPermissions();
-
     const [photoUri, setPhotoUri] = useState<string | null>(null);
+    const [resultData, setResultData] = useState<any>(null); // Adjust the type as needed
+
+    const translateY = useRef(new Animated.Value(screenHeight)).current;
+
     const cameraRef = useRef<CameraView>(null);
+
+    const panResponder = useRef(
+        PanResponder.create({
+            onMoveShouldSetPanResponder: (_, gestureState) => {
+                return gestureState.dy > 10; // Only respond to downward swipes
+            },
+            onPanResponderMove: (_, gestureState) => {
+                if (gestureState.dy > 0) {
+                    translateY.setValue(gestureState.dy);
+                }
+            },
+            onPanResponderRelease: (_, gestureState) => {
+                if (gestureState.dy > 100) {
+                    Animated.timing(translateY, {
+                        toValue: screenHeight,
+                        duration: 300,
+                        useNativeDriver: true,
+                    }).start(() => {
+                        setResultData(null);
+                    });
+                } else {
+                    // Otherwise, reset the position
+                    Animated.spring(translateY, {
+                        toValue: 0,
+                        useNativeDriver: true,
+                    }).start();
+                }
+            },
+        })
+    ).current;
 
     if (!permission) {
         // Camera permissions are still loading.
@@ -40,6 +75,25 @@ export default function HomeScreen() {
                 return;
             }
             console.log('Photo URI:', photo.uri);
+            setPhotoUri(photo.uri);
+
+            const mockResult = {
+                food_name: 'Pad Thai',
+                ' no': ['Milk'],
+                ' maybe': ['Eggs', 'Fish', 'Tree nuts', 'Peanuts', 'Wheat', 'Soybeans', 'Sesame'],
+                ' yes': ['Shellfish'],
+            }
+
+            setResultData(mockResult);
+
+            translateY.setValue(screenHeight);
+            Animated.timing(translateY, {
+                toValue: 0,
+                duration: 400,
+                useNativeDriver: true,
+            }).start();
+
+            // Need to move it to Try
 
             try {
                 const result = await uploadImage(photo.uri);
@@ -61,7 +115,7 @@ export default function HomeScreen() {
                 <View style={styles.bottomLeftCorner} />
                 <View style={styles.topLeftCorner} />
                 <View style={styles.bottomRightCorner} />
-                {/*<View style = {styles.footer} />*/}
+
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.shutterButton} onPress={takePicture}>
                         <View style={styles.outerCircle}>
@@ -70,8 +124,46 @@ export default function HomeScreen() {
                     </TouchableOpacity>
                 </View>
             </CameraView>
-        </View>
+            {resultData && (
+                <Animated.View
+                    {...panResponder.panHandlers}
+                    style={[
+                        StyleSheet.absoluteFill,
+                        {
+                            transform: [{ translateY }],
+                            backgroundColor: 'rgba(247, 246, 239, 1)',
+                            zIndex: 999,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            padding: 20,
+                        },
+                    ]}
+                >
+                    <View style={{ alignItems: 'center' }}>
+                        <Text style={styles.resultHeader}>Food: {resultData.food_name}</Text>
 
+                        <Text style={styles.sectionTitle}>❌ No:</Text>
+                        {resultData[' no']?.map((item: string, i: number) => (
+                            <Text key={`no-${i}`} style={styles.resultItem}>- {item}</Text>
+                        ))}
+
+                        <Text style={styles.sectionTitle}>❓ Maybe:</Text>
+                        {resultData[' maybe']?.map((item: string, i: number) => (
+                            <Text key={`maybe-${i}`} style={styles.resultItem}>- {item}</Text>
+                        ))}
+
+                        <Text style={styles.sectionTitle}>✅ Yes:</Text>
+                        {resultData[' yes']?.map((item: string, i: number) => (
+                            <Text key={`yes-${i}`} style={styles.resultItem}>- {item}</Text>
+                        ))}
+
+                        <Text style={{ marginTop: 20, color: '#999', fontSize: 12 }}>
+                            Swipe down to close
+                        </Text>
+                    </View>
+                </Animated.View>
+            )}
+        </View>
     );
 }
 
@@ -185,6 +277,21 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 40,
         borderTopRightRadius: 40,
         zIndex: 15,
+    },
+    resultHeader: {
+        fontSize: 20,
+        color: 'black',
+        fontWeight: 'bold',
+        marginBottom: 12,
+    },
+    sectionTitle: {
+        fontSize: 16,
+        color: 'black',
+        marginTop: 10,
+    },
+    resultItem: {
+        fontSize: 14,
+        color: 'black',
     },
 });
 
