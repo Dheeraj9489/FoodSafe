@@ -64,8 +64,10 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="home" // scan
+                name="index" // scan
+
                 options={{
+                    title: 'Scan',
                     tabBarLabel: ({ focused }) => (
                         <View
                             style={{

@@ -29,8 +29,11 @@ export default function HomeScreen() {
     return (
         <View style={styles.container}>
             <CameraView style={styles.camera} facing={facing}>
-                <View style = {styles.overlayBox} />
-                <View style = {styles.footer} />
+                <View style={styles.topRightCorner} />
+                <View style={styles.bottomLeftCorner} />
+                <View style={styles.topLeftCorner} />
+                <View style={styles.bottomRightCorner} />
+                {/*<View style = {styles.footer} />*/}
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
                         <Text style={styles.text}>Flip Camera</Text>
@@ -41,6 +44,9 @@ export default function HomeScreen() {
 
     );
 }
+
+const BORDER_THICKNESS = 3;
+const CORNER_SIZE = 50; // Size of the corner squares
 
 const styles = StyleSheet.create({
     container: {
@@ -71,24 +77,56 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'white',
     },
-    overlayBox: {
+    topRightCorner: {
+        position: 'absolute',
+        top: '30%',
+        right: '15%',
+        width: CORNER_SIZE,
+        height: CORNER_SIZE,
+        borderTopWidth: 3,
+        borderRightWidth: 3,
+        borderColor: 'white',
+        borderTopRightRadius: 25,
+    },
+    topLeftCorner: {
         position: 'absolute',
         top: '30%',
         left: '15%',
-        width: '70%',
-        height: '40%',
-        borderRadius: 20,
-        borderWidth: 2,
+        width: CORNER_SIZE,
+        height: CORNER_SIZE,
+        borderTopWidth:BORDER_THICKNESS,
+        borderLeftWidth: BORDER_THICKNESS,
         borderColor: 'white',
-        backgroundColor: 'rgba(255, 255, 255, 0.1)', // translucent
-        zIndex: 10,
+        borderTopLeftRadius: 25,
+    },
+    bottomLeftCorner: {
+        position: 'absolute',
+        bottom: '30%',
+        left: '15%',
+        width: CORNER_SIZE,
+        height: CORNER_SIZE,
+        borderBottomWidth:BORDER_THICKNESS,
+        borderLeftWidth: BORDER_THICKNESS,
+        borderColor: 'white',
+        borderBottomLeftRadius: 25,
+    },
+    bottomRightCorner: {
+        position: 'absolute',
+        bottom: '30%',
+        right: '15%',
+        width: CORNER_SIZE,
+        height: CORNER_SIZE,
+        borderBottomWidth:BORDER_THICKNESS,
+        borderRightWidth: BORDER_THICKNESS,
+        borderColor: 'white',
+        borderBottomRightRadius: 25,
     },
     footer: {
         position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
-        height: 120, // adjust height as needed
+        height: 80, // adjust height as needed
         backgroundColor: "#fbfbfa",
         borderTopLeftRadius: 40,
         borderTopRightRadius: 40,
