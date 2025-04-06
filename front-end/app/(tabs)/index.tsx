@@ -1,6 +1,6 @@
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useRef, useState } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Animated, Dimensions, PanResponder } from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, View, Animated, Dimensions, PanResponder, Image } from 'react-native';
 import { uploadImage, translateTextToSpeech } from '@/constants/api';
 import { Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -39,7 +39,7 @@ export default function HomeScreen() {
 
     const cameraRef = useRef<CameraView>(null);
 
-    const popupMode = (() => {
+    const popupMode = (() => {                              
         if (!resultData) return null;
         if (resultData[' yes']?.length > 0) return 'yes';
         if (resultData[' maybe']?.length > 0) return 'maybe';
@@ -133,10 +133,10 @@ export default function HomeScreen() {
             setPhotoUri(photo.uri);
 
             const mockResult: AllergyResponse = {
-                food_name: 'Pad Thai',
-                ' no': ['Milk'],
-                ' maybe': ['Eggs', 'Fish', 'Tree nuts', 'Peanuts', 'Wheat', 'Soybeans', 'Sesame'],
-                ' yes': ['Shellfish'],
+                food_name: 'Loading ....',
+                ' no': [],
+                ' maybe': [],
+                ' yes': [],
             }
 
             setResultData(mockResult);
@@ -226,10 +226,18 @@ export default function HomeScreen() {
                     </View>
                     {popupMode === 'yes' && (
                         <View style={{ alignItems: 'center' }}>
-                            <Text style={styles.resultHeader}>❗ Confirmed Allergens</Text>
-                            {resultData[' yes'].map((item, i) => (
-                                <Text key={`yes-${i}`} style={styles.resultItem}>- {item}</Text>
-                            ))}
+                            <Text style={styles.resultHeader}>{resultData.food_name}</Text>
+                            <Image
+                                source={require('../../assets/images/stop-icon.png')}
+                                style={{ width: 200, height: 200, marginTop: 20, marginBottom: 20 }}
+                            />
+                            <Text style={styles.resultItem}>
+                                This dish contains:{' '}
+                                <Text style={[styles.resultItem, { fontWeight: 'bold' }]}>
+                                    {resultData[' maybe'].join(', ')}
+                                </Text>
+                                .
+                            </Text>
                         </View>
                     )}
 
@@ -238,16 +246,25 @@ export default function HomeScreen() {
                             {!showTranslationUI ? (
                                 <>
                                     {/* ⚠️ Shown before user clicks Translate */}
-                                    <Text style={styles.resultHeader}>⚠️ Possible Allergens</Text>
-                                    {resultData[' maybe'].map((item, i) => (
-                                        <Text key={`maybe-${i}`} style={styles.resultItem}>- {item}</Text>
-                                    ))}
-                                    <Text style={{ fontSize: 36, color: 'yellow' }}>🔶</Text>
+                                    <Text style={styles.resultHeader}>{resultData.food_name}</Text>
+                                    <Image
+                                        source={require('../../assets/images/warn-icon.png')}
+                                        style={{ width: 200, height: 200, marginTop: 20, marginBottom: 20 }}
+                                    />
+                                    <Text style={{ fontWeight: 'bold', fontSize: 25, marginBottom: 15 }}>Might contain allergen</Text>
+                                    <Text style={styles.resultItem}>
+                                        This dish may contain:{' '}
+                                        <Text style={[styles.resultItem, { fontWeight: 'bold' }]}>
+                                            {resultData[' maybe'].join(', ')}
+                                        </Text>
+                                        .
+                                    </Text>
+                                    <Text style={{ fontSize: 16, marginBottom: 10, marginTop: 15 }}>Ask if the dish contains those ingredients</Text>
                                     <TouchableOpacity
                                         onPress={() => setShowTranslationUI(true)}
-                                        style={{ marginTop: 10 }}
+                                        style={ styles.translateButton }
                                     >
-                                        <Text style={{ color: 'black' }}>Translate</Text>
+                                        <Text style={ styles.translateButtonText }>Translate</Text>
                                     </TouchableOpacity>
                                 </>
                             ) : (
@@ -294,10 +311,13 @@ export default function HomeScreen() {
                     )}
                     {popupMode === 'no' && (
                         <View style={{ alignItems: 'center' }}>
-                            <Text style={styles.resultHeader}>✅ No Allergens Detected</Text>
-                            <Text style={{ color: 'green', fontSize: 16, marginTop: 10 }}>
-                                You're safe to eat this food.
-                            </Text>
+                            <Text style={styles.resultHeader}>{resultData.food_name}</Text>
+                            <Image
+                                source={require('../../assets/images/safe-icon.png')}
+                                style={{ width: 200, height: 200, marginTop: 20, marginBottom: 20 }}
+                            />
+                            <Text style={{ fontWeight: 'bold', fontSize: 25, marginBottom: 15 }}>Safe to eat!</Text>
+                            <Text style={{ fontSize: 16, marginBottom: 10, marginTop: 15 }}>This dish doesn't contain any of your allergens</Text>
                         </View>
                     )}
                 </Animated.View>
@@ -418,7 +438,7 @@ const styles = StyleSheet.create({
         zIndex: 15,
     },
     resultHeader: {
-        fontSize: 50,
+        fontSize: 30,
         color: 'black',
         fontWeight: 'bold',
         marginBottom: 12,
@@ -453,6 +473,26 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
     },
+    translateButton: {
+        backgroundColor: '#F0F3BD', // might change
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 10,
+        marginTop: 20,
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+        elevation: 3, // ✅ for Android shadow
+    },
+
+    translateButtonText: {
+        color: 'black',
+        fontWeight: 'bold',
+        fontSize: 16,
+        textAlign: 'center',
+    },
+
 
 });
 
