@@ -3,9 +3,12 @@ import { useRef, useState } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View, Animated, Dimensions, PanResponder } from 'react-native';
 import { uploadImage, translateTextToSpeech } from '@/constants/api';
 import { Audio } from 'expo-av';
+import { LinearGradient } from 'expo-linear-gradient';
 //import { background } from '@/constants/Colors';
 
 const screenHeight = Dimensions.get('window').height;
+const popupHeight = screenHeight * 0.8; // 80% of the screen height
+const hiddenOffset = screenHeight - popupHeight; // The offset to hide the popup
 
 type AllergyResponse = {
     food_name: string;
@@ -43,7 +46,8 @@ export default function HomeScreen() {
             },
             onPanResponderMove: (_, gestureState) => {
                 if (gestureState.dy > 0) {
-                    translateY.setValue(gestureState.dy);
+                    const newTranslateY = hiddenOffset + gestureState.dy;
+                    translateY.setValue(newTranslateY);
                 }
             },
             onPanResponderRelease: (_, gestureState) => {
@@ -131,9 +135,9 @@ export default function HomeScreen() {
             setResultData(mockResult);
 
             // Need to move it to Try
-            translateY.setValue(screenHeight);
+            // translateY.setValue(hiddenOffset);
             Animated.timing(translateY, {
-                toValue: 0,
+                toValue: hiddenOffset,
                 duration: 400,
                 useNativeDriver: true,
             }).start();
@@ -155,6 +159,17 @@ export default function HomeScreen() {
     return (
         <View style={styles.container}>
             <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
+                {/* Gradient Overlay */}
+                <View style={styles.topGradientContainer}>
+                    <LinearGradient
+                        colors={['rgba(0,0,0,0.8)', 'transparent']}
+                        style={styles.topGradient}
+                    >
+                        <View style={{ top: 25 }} >
+                            <Text style={styles.foodSafeText}>FoodSafe</Text>
+                        </View>
+                    </LinearGradient>
+                </View>
                 <View style={styles.topRightCorner} />
                 <View style={styles.bottomLeftCorner} />
                 <View style={styles.topLeftCorner} />
@@ -174,18 +189,37 @@ export default function HomeScreen() {
                     style={[
                         StyleSheet.absoluteFill,
                         {
+                            position: 'absolute',
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: popupHeight, // ✅ max height is 80% of screen
                             transform: [{ translateY }],
                             backgroundColor: 'rgba(247, 246, 239, 1)',
                             zIndex: 999,
                             justifyContent: 'center',
                             alignItems: 'center',
+                            borderTopLeftRadius: 40,
+                            borderTopRightRadius: 40,
+                            overflow: 'hidden',
                             padding: 20,
                         },
                     ]}
                 >
+                    {/* Top bar (grab handle) */}
+                    <View style={{ position: 'absolute', top: 10, left: 0, right: 0, alignItems: 'center', zIndex: 1 }}>
+                        <View
+                            style={{
+                                width: 100,
+                                height: 5,
+                                borderRadius: 3,
+                                backgroundColor: 'grey',
+                            }}
+                        />
+                    </View>
                     {!showTranslationUI ? (
                         <View style={{ alignItems: 'center' }}>
-                            <Text style={styles.resultHeader}>Food: {resultData.food_name}</Text>
+                            <Text style={styles.resultHeader}>{resultData.food_name}</Text>
 
                             <Text style={styles.sectionTitle}>❌ No:</Text>
                             {resultData[' no']?.map((item, i) => (
@@ -369,7 +403,7 @@ const styles = StyleSheet.create({
         zIndex: 15,
     },
     resultHeader: {
-        fontSize: 20,
+        fontSize: 50,
         color: 'black',
         fontWeight: 'bold',
         marginBottom: 12,
@@ -383,5 +417,27 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: 'black',
     },
+    topGradientContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '15%', // covers top 10% of screen
+        zIndex: 10,
+    },
+
+    topGradient: {
+        flex: 1,
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        paddingTop: 30, // adjust for spacing
+    },
+
+    foodSafeText: {
+        color: 'white',
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
+
 });
 
