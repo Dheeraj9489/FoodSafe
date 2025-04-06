@@ -1,6 +1,6 @@
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useRef, useState } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Animated, Dimensions, PanResponder, Image } from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, View, Animated, Dimensions, PanResponder, Image, ActivityIndicator} from 'react-native';
 import { uploadImage, translateTextToSpeech } from '@/constants/api';
 import { Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -12,9 +12,9 @@ const hiddenOffset = screenHeight - popupHeight; // The offset to hide the popup
 
 type AllergyResponse = {
     food_name: string;
-    ' no': string[];
-    ' maybe': string[];
-    ' yes': string[];
+    'no': string[];
+    'maybe': string[];
+    'yes': string[];
 }
 
 const LANGUAGE_OPTIONS = [ // ✅ Language list
@@ -41,8 +41,9 @@ export default function HomeScreen() {
 
     const popupMode = (() => {                              
         if (!resultData) return null;
-        if (resultData[' yes']?.length > 0) return 'yes';
-        if (resultData[' maybe']?.length > 0) return 'maybe';
+        if (resultData['yes']?.length > 0) return 'yes';
+        if (resultData['maybe']?.length > 0) return 'maybe';
+        if (resultData['food_name']?.trim() === "Loading ....") return 'loading_screen';
         return 'no';
     })();
 
@@ -134,9 +135,9 @@ export default function HomeScreen() {
 
             const mockResult: AllergyResponse = {
                 food_name: 'Loading ....',
-                ' no': [],
-                ' maybe': [],
-                ' yes': [],
+                'no': [],
+                'maybe': [],
+                'yes': [],
             }
 
             setResultData(mockResult);
@@ -234,7 +235,7 @@ export default function HomeScreen() {
                             <Text style={styles.resultItem}>
                                 This dish contains:{' '}
                                 <Text style={[styles.resultItem, { fontWeight: 'bold' }]}>
-                                    {resultData[' maybe'].join(', ')}
+                                    {resultData['yes'].join(', ')}
                                 </Text>
                                 .
                             </Text>
@@ -255,7 +256,7 @@ export default function HomeScreen() {
                                     <Text style={styles.resultItem}>
                                         This dish may contain:{' '}
                                         <Text style={[styles.resultItem, { fontWeight: 'bold' }]}>
-                                            {resultData[' maybe'].join(', ')}
+                                            {resultData['maybe'].join(', ')}
                                         </Text>
                                         .
                                     </Text>
@@ -318,6 +319,19 @@ export default function HomeScreen() {
                             />
                             <Text style={{ fontWeight: 'bold', fontSize: 25, marginBottom: 15 }}>Safe to eat!</Text>
                             <Text style={{ fontSize: 16, marginBottom: 10, marginTop: 15 }}>This dish doesn't contain any of your allergens</Text>
+                        </View>
+                    )}
+
+                    {popupMode === 'loading_screen' && (
+                        <View style={{ alignItems: 'center' }}>
+                            <Text style={styles.resultHeader}>{"LOADING ...."}</Text>
+                            {/* <Image
+                                source={require('../../assets/images/safe-icon.png')}
+                                style={{ width: 200, height: 200, marginTop: 20, marginBottom: 20 }}
+                            /> */}
+                            <ActivityIndicator size="large" />
+                            {/* <Text style={{ fontWeight: 'bold', fontSize: 25, marginBottom: 15 }}>Safe to eat!</Text>
+                            <Text style={{ fontSize: 16, marginBottom: 10, marginTop: 15 }}>This dish doesn't contain any of your allergens</Text> */}
                         </View>
                     )}
                 </Animated.View>
