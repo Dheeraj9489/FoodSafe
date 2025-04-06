@@ -1,8 +1,9 @@
 //const BASE_URL = 'http://10.108.29.140:8000'; // Replace with your actual IP
-const BASE_URL = 'https://6445-2001-49d0-8512-1-715c-9826-b548-24b2.ngrok-free.app'; // change to your
+const BASE_URL = 'https://5667-2001-49d0-8512-1-8e54-c1e-1190-6635.ngrok-free.app'; // change to your
 
 export const getAllergies = async () => {
     const res = await fetch(`${BASE_URL}/get-allergies/`);
+    console.log("Raw input from getAllergies: ", res)
     const data = await res.json();
     console.log('Allergies:', data.allergies);
     return data.allergies;
@@ -10,12 +11,12 @@ export const getAllergies = async () => {
 
 export const addAllergy = async (item: string) => {
     const res = await fetch(`${BASE_URL}/add-allergy/${item}`, { method: 'POST' });
-    return res.json();
+    // return res.json();
 };
 
 export const removeAllergy = async (item: string) => {
     const res = await fetch(`${BASE_URL}/remove-allergy/${item}`, { method: 'DELETE' });
-    return res.json();
+    // return res.json();
 };
 
 export const uploadImage = async (fileUri: string) => {

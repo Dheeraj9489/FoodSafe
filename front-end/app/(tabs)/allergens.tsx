@@ -1,80 +1,5 @@
-// import { Image, StyleSheet, Platform } from 'react-native';
-
-// import { HelloWave } from '@/components/HelloWave';
-// import ParallaxScrollView from '@/components/ParallaxScrollView';
-// import { ThemedText } from '@/components/ThemedText';
-// import { ThemedView } from '@/components/ThemedView';
-
-// export default function TabTwoScreen() {
-//   return (
-//     <ParallaxScrollView
-//       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-//       headerImage={
-//         <Image
-//           source={require('@/assets/images/partial-react-logo.png')}
-//           style={styles.reactLogo}
-//         />
-//       }>
-//       <ThemedView style={styles.titleContainer}>
-//         <ThemedText type="title">Welcome!</ThemedText>
-//         <HelloWave />
-//       </ThemedView>
-//       <ThemedView style={styles.stepContainer}>
-//         <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-//         <ThemedText>
-//           Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-//           Press{' '}
-//           <ThemedText type="defaultSemiBold">
-//             {Platform.select({
-//               ios: 'cmd + d',
-//               android: 'cmd + m',
-//               web: 'F12'
-//             })}
-//           </ThemedText>{' '}
-//           to open developer tools.
-//         </ThemedText>
-//       </ThemedView>
-//       <ThemedView style={styles.stepContainer}>
-//         <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-//         <ThemedText>
-//           Tap the Explore tab to learn more about what's included in this starter app.
-//         </ThemedText>
-//       </ThemedView>
-//       <ThemedView style={styles.stepContainer}>
-//         <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-//         <ThemedText>
-//           When you're ready, run{' '}
-//           <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-//           <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-//           <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-//           <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-//         </ThemedText>
-//       </ThemedView>
-//     </ParallaxScrollView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   titleContainer: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     gap: 8,
-//   },
-//   stepContainer: {
-//     gap: 8,
-//     marginBottom: 8,
-//   },
-//   reactLogo: {
-//     height: 178,
-//     width: 290,
-//     bottom: 0,
-//     left: 0,
-//     position: 'absolute',
-//   },
-// });
-
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import { 
   View, 
   Text, 
@@ -89,6 +14,9 @@ import { AntDesign } from '@expo/vector-icons';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { useRouter } from 'expo-router';
 
+// Assume these functions are imported from your API module.
+import { getAllergies, addAllergy, removeAllergy } from '@/constants/api';
+
 interface Allergen {
   id: string;
   name: string;
@@ -96,52 +24,93 @@ interface Allergen {
 
 const Allergens = () => {
   const router = useRouter();
-  const [allergens, setAllergens] = useState<Allergen[]>([
-    { id: '1', name: 'Peanuts' },
-    { id: '2', name: 'Shellfish' },
-    { id: '3', name: 'Dairy' },
-  ]);
-
-  // State to control modal visibility and new allergen input.
+  const insets = useSafeAreaInsets();
+  const [allergens, setAllergens] = useState<Allergen[]>([]);
   const [isModalVisible, setModalVisible] = useState(false);
   const [newAllergenName, setNewAllergenName] = useState('');
 
-  // Deletes an allergen by filtering it out of the state array.
-  const deleteItem = (id: string) => {
-    setAllergens(prev => prev.filter(item => item.id !== id));
-  };
+  useEffect(() => {
+    const fetchAllergies = async () => {
+      try {
+        const result = await getAllergies();
+        // If result is an array of strings, map each to an object with a unique id.
+        const allergenList = result.map((allergen: string, index: number) => ({
+          id: index.toString(), // Use index (or a better unique value if available)
+          name: allergen,
+        }));
+        setAllergens(allergenList);
+      } catch (error) {
+        console.error('Failed to load allergies:', error);
+      }
+    };
+    fetchAllergies();
+  }, []);
 
-  // Handles adding a new allergen.
-  const handleAddAllergen = () => {
+  const handleAddAllergen = async () => {
     if (newAllergenName.trim() !== '') {
-      const newAllergen: Allergen = {
-        id: Date.now().toString(), // Use timestamp as unique ID.
-        name: newAllergenName,
-      };
-      setAllergens(prev => [...prev, newAllergen]);
-      setNewAllergenName('');
-      setModalVisible(false);
+      try {
+        await addAllergy(newAllergenName);
+        // Create a new allergen object with a unique id.
+        const newAllergen: Allergen = { id: Date.now().toString(), name: newAllergenName };
+        setAllergens(prev => [...prev, newAllergen]);
+        setNewAllergenName('');
+        setModalVisible(false);
+      } catch (error) {
+        console.error('Failed to add allergen:', error);
+      }
     }
   };
 
-  // Renders the swipeable delete button.
+  // const deleteItem = async (id: string) => {
+  //   try {
+  //     await removeAllergy(id);
+  //     setAllergens(prev => prev.filter(item => item.id !== id));
+  //   } catch (error) {
+  //     console.error('Failed to remove allergen:', error);
+  //   }
+  // };
+  const deleteItem = async (allergenName: string) => {
+    try {
+      await removeAllergy(allergenName);
+      setAllergens(prev => prev.filter(item => item.name !== allergenName));
+    } catch (error) {
+      console.error('Failed to remove allergen:', error);
+    }
+  };
+
+  // const renderRightActions = (
+  //   progress: Animated.AnimatedInterpolation,
+  //   dragX: Animated.AnimatedInterpolation,
+  //   itemId: string
+  // ) => (
+  //   <TouchableOpacity style={styles.deleteButton} onPress={() => deleteItem(itemId)}>
+  //     <Text style={styles.deleteText}>Delete</Text>
+  //   </TouchableOpacity>
+  // );
   const renderRightActions = (
     progress: Animated.AnimatedInterpolation,
     dragX: Animated.AnimatedInterpolation,
-    itemId: string
-  ) => {
-    return (
-      <TouchableOpacity style={styles.deleteButton} onPress={() => deleteItem(itemId)}>
-        <Text style={styles.deleteText}>Delete</Text>
-      </TouchableOpacity>
-    );
-  };
+    itemName: string
+  ) => (
+    <TouchableOpacity style={styles.deleteButton} onPress={() => deleteItem(itemName)}>
+      <Text style={styles.deleteText}>Delete</Text>
+    </TouchableOpacity>
+  );
 
-  // Renders each allergen in a Swipeable component.
+  // const renderItem = ({ item }: { item: Allergen }) => (
+  //   // Add the key prop to the top-level Swipeable component
+  //   <Swipeable key={item.id} renderRightActions={(progress, dragX) =>
+  //     renderRightActions(progress, dragX, item.id)
+  //   }>
+  //     <View style={styles.itemContainer}>
+  //       <Text style={styles.itemText}>{item.name}</Text>
+  //     </View>
+  //   </Swipeable>
+  // );
   const renderItem = ({ item }: { item: Allergen }) => (
     <Swipeable
       renderRightActions={(progress, dragX) =>
-        renderRightActions(progress, dragX, item.id)
+        renderRightActions(progress, dragX, item.name)
       }
     >
       <View style={styles.itemContainer}>
@@ -151,8 +120,9 @@ const Allergens = () => {
   );
 
   return (
-    <View style={styles.container}>
-      {/* Header Bar */}
+    <SafeAreaView style={styles.safeArea}>
+    {/* <View style={styles.container}> */}
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Allergens</Text>
         <TouchableOpacity onPress={() => router.push('/conditions')}>
@@ -160,7 +130,7 @@ const Allergens = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Scrollable Allergens List */}
+      {/* FlatList with keyExtractor using the unique id */}
       <FlatList
         data={allergens}
         keyExtractor={(item) => item.id}
@@ -169,10 +139,7 @@ const Allergens = () => {
       />
 
       {/* Floating Action Button */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => setModalVisible(true)}
-      >
+      <TouchableOpacity style={[styles.fab]} onPress={() => setModalVisible(true)}>
         <AntDesign name="plus" size={24} color="black" />
       </TouchableOpacity>
 
@@ -201,7 +168,8 @@ const Allergens = () => {
           </View>
         </View>
       </Modal>
-    </View>
+    {/* </View> */}
+    </SafeAreaView>
   );
 };
 
@@ -257,7 +225,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 80,
+    bottom: -350,
     backgroundColor: '#fff',
     width: 60,
     height: 60,
