@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 //import { background } from '@/constants/Colors';
 
 const screenHeight = Dimensions.get('window').height;
-const popupHeight = screenHeight * 0.8; // 80% of the screen height
+const popupHeight = screenHeight * 0.85; // 85% of the screen height
 const hiddenOffset = screenHeight - popupHeight; // The offset to hide the popup
 
 type AllergyResponse = {
@@ -65,7 +65,7 @@ export default function HomeScreen() {
                 } else {
                     // Otherwise, reset the position
                     Animated.spring(translateY, {
-                        toValue: 0,
+                        toValue: hiddenOffset,
                         useNativeDriver: true,
                     }).start();
                 }
@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        height: 80, // adjust height as needed
+        height: 100, // adjust height as needed
         backgroundColor: "#fbfbfa",
         borderTopLeftRadius: 40,
         borderTopRightRadius: 40,
