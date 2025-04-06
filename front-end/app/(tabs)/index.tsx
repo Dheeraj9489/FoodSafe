@@ -39,6 +39,13 @@ export default function HomeScreen() {
 
     const cameraRef = useRef<CameraView>(null);
 
+    const popupMode = (() => {
+        if (!resultData) return null;
+        if (resultData[' yes']?.length > 0) return 'yes';
+        if (resultData[' maybe']?.length > 0) return 'maybe';
+        return 'no';
+    })();
+
     const panResponder = useRef(
         PanResponder.create({
             onMoveShouldSetPanResponder: (_, gestureState) => {
@@ -217,19 +224,22 @@ export default function HomeScreen() {
                             }}
                         />
                     </View>
-                    {!showTranslationUI ? (
+                    {popupMode === 'yes' && (
                         <View style={{ alignItems: 'center' }}>
-                            <Text style={styles.resultHeader}>{resultData.food_name}</Text>
-
-                            <Text style={styles.sectionTitle}>❌ No:</Text>
-                            {resultData[' no']?.map((item, i) => (
-                                <Text key={`no-${i}`} style={styles.resultItem}>- {item}</Text>
+                            <Text style={styles.resultHeader}>❗ Confirmed Allergens</Text>
+                            {resultData[' yes'].map((item, i) => (
+                                <Text key={`yes-${i}`} style={styles.resultItem}>- {item}</Text>
                             ))}
+                        </View>
+                    )}
 
-                            {resultData[' maybe']?.length > 0 && (
+                    {popupMode === 'maybe' && (
+                        <View style={{ alignItems: 'center' }}>
+                            {!showTranslationUI ? (
                                 <>
-                                    <Text style={styles.sectionTitle}>⚠️ Maybe:</Text>
-                                    {resultData[' maybe']?.map((item, i) => (
+                                    {/* ⚠️ Shown before user clicks Translate */}
+                                    <Text style={styles.resultHeader}>⚠️ Possible Allergens</Text>
+                                    {resultData[' maybe'].map((item, i) => (
                                         <Text key={`maybe-${i}`} style={styles.resultItem}>- {item}</Text>
                                     ))}
                                     <Text style={{ fontSize: 36, color: 'yellow' }}>🔶</Text>
@@ -240,49 +250,54 @@ export default function HomeScreen() {
                                         <Text style={{ color: 'black' }}>Translate</Text>
                                     </TouchableOpacity>
                                 </>
-                            )}
+                            ) : (
+                                <>
+                                    {/* 🌍 Shown after clicking Translate */}
+                                    <Text style={styles.sectionTitle}>Select Language:</Text>
+                                    {LANGUAGE_OPTIONS.map(({ code, label }) => (
+                                        <TouchableOpacity
+                                            key={code}
+                                            onPress={() => setSelectedLanguage(code)}
+                                            style={{ marginVertical: 5 }}
+                                        >
+                                            <Text style={{ color: selectedLanguage === code ? 'blue' : 'black' }}>
+                                                {label}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
 
-                            <Text style={styles.sectionTitle}>✅ Yes:</Text>
-                            {resultData[' yes']?.map((item, i) => (
-                                <Text key={`yes-${i}`} style={styles.resultItem}>- {item}</Text>
-                            ))}
+                                    <TouchableOpacity
+                                        onPress={requestTranslation}
+                                        style={{ marginTop: 20, backgroundColor: '#444', padding: 10, borderRadius: 5 }}
+                                    >
+                                        {/* ❗️ Updated this to use the same text color as other buttons */}
+                                        <Text style={{ color: 'black' }}>Get Translation</Text>
+                                    </TouchableOpacity>
+
+                                    {translationText !== '' && (
+                                        <View style={{ marginTop: 20 }}>
+                                            <Text style={{ color: 'black', fontSize: 16 }}>{translationText}</Text>
+                                        </View>
+                                    )}
+
+                                    {audioBase64 !== '' && (
+                                        <TouchableOpacity
+                                            onPress={playAudio}
+                                            style={{ marginTop: 40, backgroundColor: '#555', padding: 12, borderRadius: 6 }}
+                                        >
+                                            <Text style={{ color: 'white' }}>🔊 Speak</Text>
+                                        </TouchableOpacity>
+                                    )}
+                                </>
+                            )}
                         </View>
-                    ) : (
+                    )}
+                    {popupMode === 'no' && (
                         <View style={{ alignItems: 'center' }}>
-                            <Text style={styles.resultHeader}>Select Language:</Text>
-                            {LANGUAGE_OPTIONS.map(({ code, label }) => (
-                                <TouchableOpacity
-                                    key={code}
-                                    onPress={() => setSelectedLanguage(code)}
-                                    style={{ marginVertical: 5 }}
-                                >
-                                    <Text style={{ color: selectedLanguage === code ? 'blue' : 'black' }}>
-                                        {label}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-
-                            <TouchableOpacity
-                                onPress={requestTranslation}
-                                style={{ marginTop: 20, backgroundColor: '#444', padding: 10, borderRadius: 5 }}
-                            >
-                                <Text style={{ color: 'white' }}>Get Translation</Text>
-                            </TouchableOpacity>
-
-                            {translationText !== '' && (
-                                <View style={{ marginTop: 20 }}>
-                                    <Text style={{ color: 'white', fontSize: 16 }}>{translationText}</Text>
-                                </View>
-                            )}
-
-                            {audioBase64 !== '' && (
-                                <TouchableOpacity
-                                    onPress={playAudio}
-                                    style={{ marginTop: 40, backgroundColor: '#555', padding: 12, borderRadius: 6 }}
-                                >
-                                    <Text style={{ color: 'white' }}>🔊 Speak</Text>
-                                </TouchableOpacity>
-                            )}
+                            <Text style={styles.resultHeader}>✅ No Allergens Detected</Text>
+                            <Text style={{ color: 'green', fontSize: 16, marginTop: 10 }}>
+                                You're safe to eat this food.
+                            </Text>
                         </View>
                     )}
                 </Animated.View>
