@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: -350,
+    bottom: -440,
     backgroundColor: '#fff',
     width: 60,
     height: 60,
