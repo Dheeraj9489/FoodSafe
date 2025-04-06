@@ -63,8 +63,10 @@ export default function HomeScreen() {
                 <View style={styles.bottomRightCorner} />
                 {/*<View style = {styles.footer} />*/}
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.button} onPress={takePicture}>
-                        <Text style={styles.text}>Take Photo</Text>
+                    <TouchableOpacity style={styles.shutterButton} onPress={takePicture}>
+                        <View style={styles.outerCircle}>
+                            <View style={styles.innerCircle} />
+                        </View>
                     </TouchableOpacity>
                 </View>
             </CameraView>
@@ -79,7 +81,7 @@ const CORNER_SIZE = 50; // Size of the corner squares
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         paddingBottom: 70,
     },
     message: {
@@ -90,10 +92,11 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     buttonContainer: {
-        flex: 1,
-        flexDirection: 'row',
-        backgroundColor: 'transparent',
-        margin: 64,
+        marginTop: 750,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'transparant',
+        margin: 15,
     },
     button: {
         flex: 1,
@@ -149,6 +152,29 @@ const styles = StyleSheet.create({
         borderColor: 'white',
         borderBottomRightRadius: 25,
     },
+    shutterButton: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+      outerCircle: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)', // 20% opacity white
+        borderWidth: 2,
+        borderColor: 'white',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+      innerCircle: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: 'white',
+      },
     footer: {
         position: 'absolute',
         bottom: 0,
