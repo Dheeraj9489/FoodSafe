@@ -118,7 +118,7 @@ def text_to_speech(language: str):
     # Build the voice request, select the language code ("en-US") and the ssml
     # voice gender ("neutral")
     voice = texttospeech.VoiceSelectionParams(
-        language_code=supported_langs[language], ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
+        language_code=language, ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
     )
 
     # Select the type of audio file you want returned
