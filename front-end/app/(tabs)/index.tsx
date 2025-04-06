@@ -1,16 +1,36 @@
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useRef, useState } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View, Animated, Dimensions, PanResponder } from 'react-native';
-import { uploadImage } from '@/constants/api';
+import { uploadImage, translateTextToSpeech } from '@/constants/api';
+import { Audio } from 'expo-av';
 //import { background } from '@/constants/Colors';
 
 const screenHeight = Dimensions.get('window').height;
+
+type AllergyResponse = {
+    food_name: string;
+    ' no': string[];
+    ' maybe': string[];
+    ' yes': string[];
+}
+
+const LANGUAGE_OPTIONS = [ // ✅ Language list
+    { label: 'Spanish', code: 'es' },
+    { label: 'French', code: 'fr' },
+    { label: 'German', code: 'de' },
+    { label: 'Chinese', code: 'zh-cn' },
+    { label: 'Arabic', code: 'ar' },
+];
 
 export default function HomeScreen() {
     const [facing, setFacing] = useState<CameraType>('back');
     const [permission, requestPermission] = useCameraPermissions();
     const [photoUri, setPhotoUri] = useState<string | null>(null);
-    const [resultData, setResultData] = useState<any>(null); // Adjust the type as needed
+    const [resultData, setResultData] = useState<AllergyResponse | null>(null);
+    const [showTranslationUI, setShowTranslationUI] = useState(false);
+    const [selectedLanguage, setSelectedLanguage] = useState('es');
+    const [translationText, setTranslationText] = useState('');
+    const [audioBase64, setAudioBase64] = useState('')
 
     const translateY = useRef(new Animated.Value(screenHeight)).current;
 
@@ -34,6 +54,9 @@ export default function HomeScreen() {
                         useNativeDriver: true,
                     }).start(() => {
                         setResultData(null);
+                        setShowTranslationUI(false);
+                        setTranslationText('');
+                        setAudioBase64('');
                     });
                 } else {
                     // Otherwise, reset the position
@@ -45,6 +68,27 @@ export default function HomeScreen() {
             },
         })
     ).current;
+
+    const requestTranslation = async () => {
+        try {
+            const data = await translateTextToSpeech(selectedLanguage);
+            setTranslationText(data.translation);
+            setAudioBase64(data.audio);
+        } catch (e) {
+            console.error('Translation failed:', e);
+        }
+    };
+    const playAudio = async () => {
+        if (!audioBase64) return;
+        const sound = new Audio.Sound();
+        const uri = `data:audio/mp3;base64,${audioBase64}`;
+        try {
+            await sound.loadAsync({ uri });
+            await sound.playAsync();
+        } catch (e) {
+            console.error('Audio play failed:', e);
+        }
+    };
 
     if (!permission) {
         // Camera permissions are still loading.
@@ -77,7 +121,7 @@ export default function HomeScreen() {
             console.log('Photo URI:', photo.uri);
             setPhotoUri(photo.uri);
 
-            const mockResult = {
+            const mockResult: AllergyResponse = {
                 food_name: 'Pad Thai',
                 ' no': ['Milk'],
                 ' maybe': ['Eggs', 'Fish', 'Tree nuts', 'Peanuts', 'Wheat', 'Soybeans', 'Sesame'],
@@ -86,6 +130,7 @@ export default function HomeScreen() {
 
             setResultData(mockResult);
 
+            // Need to move it to Try
             translateY.setValue(screenHeight);
             Animated.timing(translateY, {
                 toValue: 0,
@@ -93,10 +138,9 @@ export default function HomeScreen() {
                 useNativeDriver: true,
             }).start();
 
-            // Need to move it to Try
-
             try {
-                const result = await uploadImage(photo.uri);
+                const result: AllergyResponse = await uploadImage(photo.uri);
+                setResultData(result);
                 console.log('Upload result:', result);
                 // You can now use the returned JSON (e.g., display a message or store info)
             } catch (error) {
@@ -139,28 +183,74 @@ export default function HomeScreen() {
                         },
                     ]}
                 >
-                    <View style={{ alignItems: 'center' }}>
-                        <Text style={styles.resultHeader}>Food: {resultData.food_name}</Text>
+                    {!showTranslationUI ? (
+                        <View style={{ alignItems: 'center' }}>
+                            <Text style={styles.resultHeader}>Food: {resultData.food_name}</Text>
 
-                        <Text style={styles.sectionTitle}>❌ No:</Text>
-                        {resultData[' no']?.map((item: string, i: number) => (
-                            <Text key={`no-${i}`} style={styles.resultItem}>- {item}</Text>
-                        ))}
+                            <Text style={styles.sectionTitle}>❌ No:</Text>
+                            {resultData[' no']?.map((item, i) => (
+                                <Text key={`no-${i}`} style={styles.resultItem}>- {item}</Text>
+                            ))}
 
-                        <Text style={styles.sectionTitle}>❓ Maybe:</Text>
-                        {resultData[' maybe']?.map((item: string, i: number) => (
-                            <Text key={`maybe-${i}`} style={styles.resultItem}>- {item}</Text>
-                        ))}
+                            {resultData[' maybe']?.length > 0 && (
+                                <>
+                                    <Text style={styles.sectionTitle}>⚠️ Maybe:</Text>
+                                    {resultData[' maybe']?.map((item, i) => (
+                                        <Text key={`maybe-${i}`} style={styles.resultItem}>- {item}</Text>
+                                    ))}
+                                    <Text style={{ fontSize: 36, color: 'yellow' }}>🔶</Text>
+                                    <TouchableOpacity
+                                        onPress={() => setShowTranslationUI(true)}
+                                        style={{ marginTop: 10 }}
+                                    >
+                                        <Text style={{ color: 'black' }}>Translate</Text>
+                                    </TouchableOpacity>
+                                </>
+                            )}
 
-                        <Text style={styles.sectionTitle}>✅ Yes:</Text>
-                        {resultData[' yes']?.map((item: string, i: number) => (
-                            <Text key={`yes-${i}`} style={styles.resultItem}>- {item}</Text>
-                        ))}
+                            <Text style={styles.sectionTitle}>✅ Yes:</Text>
+                            {resultData[' yes']?.map((item, i) => (
+                                <Text key={`yes-${i}`} style={styles.resultItem}>- {item}</Text>
+                            ))}
+                        </View>
+                    ) : (
+                        <View style={{ alignItems: 'center' }}>
+                            <Text style={styles.resultHeader}>Select Language:</Text>
+                            {LANGUAGE_OPTIONS.map(({ code, label }) => (
+                                <TouchableOpacity
+                                    key={code}
+                                    onPress={() => setSelectedLanguage(code)}
+                                    style={{ marginVertical: 5 }}
+                                >
+                                    <Text style={{ color: selectedLanguage === code ? 'blue' : 'black' }}>
+                                        {label}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
 
-                        <Text style={{ marginTop: 20, color: '#999', fontSize: 12 }}>
-                            Swipe down to close
-                        </Text>
-                    </View>
+                            <TouchableOpacity
+                                onPress={requestTranslation}
+                                style={{ marginTop: 20, backgroundColor: '#444', padding: 10, borderRadius: 5 }}
+                            >
+                                <Text style={{ color: 'white' }}>Get Translation</Text>
+                            </TouchableOpacity>
+
+                            {translationText !== '' && (
+                                <View style={{ marginTop: 20 }}>
+                                    <Text style={{ color: 'white', fontSize: 16 }}>{translationText}</Text>
+                                </View>
+                            )}
+
+                            {audioBase64 !== '' && (
+                                <TouchableOpacity
+                                    onPress={playAudio}
+                                    style={{ marginTop: 40, backgroundColor: '#555', padding: 12, borderRadius: 6 }}
+                                >
+                                    <Text style={{ color: 'white' }}>🔊 Speak</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    )}
                 </Animated.View>
             )}
         </View>

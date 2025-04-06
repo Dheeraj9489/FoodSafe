@@ -34,3 +34,19 @@ export const uploadImage = async (fileUri: string) => {
 
     return res.json();
 };
+
+export const translateTextToSpeech = async (language: string) => {
+    const res = await fetch(`${BASE_URL}/translate/${language}`, {
+        method: 'POST',
+    });
+
+    if (!res.ok) {
+        throw new Error(`Translation failed with status ${res.status}`);
+    }
+
+    const data = await res.json();
+    return {
+        translation: data.translation,
+        audio: data.audio,
+    };
+};
