@@ -289,12 +289,12 @@ export default function HomeScreen() {
                                         style={{ marginTop: 20, backgroundColor: '#444', padding: 10, borderRadius: 5 }}
                                     >
                                         {/* ❗️ Updated this to use the same text color as other buttons */}
-                                        <Text style={{ color: 'black' }}>Get Translation</Text>
+                                        <Text style={{ color: 'white', fontSize: 20 }}>Get Translation</Text>
                                     </TouchableOpacity>
 
                                     {translationText !== '' && (
-                                        <View style={{ marginTop: 20 }}>
-                                            <Text style={{ color: 'black', fontSize: 16 }}>{translationText}</Text>
+                                        <View style={{ marginTop: 20, borderColor: 'black' }}>
+                                            <Text style={{ color: 'black', fontSize: 20 }}>{translationText}</Text>
                                         </View>
                                     )}
 
@@ -303,7 +303,7 @@ export default function HomeScreen() {
                                             onPress={playAudio}
                                             style={{ marginTop: 40, backgroundColor: '#555', padding: 12, borderRadius: 6 }}
                                         >
-                                            <Text style={{ color: 'white' }}>🔊 Speak</Text>
+                                            <Text style={{ color: 'white', fontSize: 20 }}>🔊 Speak</Text>
                                         </TouchableOpacity>
                                     )}
                                 </>
