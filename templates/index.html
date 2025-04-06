@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+    <title>FoodSafe Backup</title>
+</head>
+<body>
+    <h1>Upload Image and Select Allergies</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="image" required><br><br>
+        <label>Select allergens:</label><br>
+        {% for allergen in allergens %}
+            <input type="checkbox" name="allergies" value="{{ allergen }}"> {{ allergen }}<br>
+        {% endfor %}
+        <br>
+        <input type="submit" value="Analyze">
+    </form>
+
+    {% if result %}
+        <h2>Results:</h2>
+        <pre>{{ result }}</pre>
+    {% endif %}
+</body>
+</html>

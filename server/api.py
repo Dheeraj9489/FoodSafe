@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import os
 import json
-from gemini_generation import gemini_generation
+from .gemini_generation import gemini_generation
 from deep_translator import GoogleTranslator
 from google.cloud import texttospeech
 import base64
@@ -47,7 +47,7 @@ def get_all_allergens():
     return allergens
 
 @app.get("/get-allergies/")
-def get_all_allergens_endpoint():
+def get_all_allergens_endpoint():   
     return {"allergies": list(get_all_allergens())}
 
 # individual allergies
