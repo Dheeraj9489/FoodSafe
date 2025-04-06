@@ -19,46 +19,104 @@ export default function TabLayout() {
                 headerShown: false,
                 tabBarButton: HapticTab,
                 tabBarBackground: TabBarBackground,
-                tabBarStyle: Platform.select({
-                    ios: {
-                        // Use a transparent background on iOS to show the blur effect
-                        position: 'absolute',
-                    },
-                    default: {},
-                }),
+                tabBarStyle: {
+                    backgroundColor: '#F7F6EF',      // Solid background color
+                    borderTopWidth: 0,            // Removes border shadow
+                    height: 90,                   // Customize height
+                    paddingBottom: 10,            // Adjust padding
+                    paddingTop: 10,
+                    position: 'absolute',
+
+                    // android shadow
+                    elevation: 4,
+
+                    // ios shadow
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: -2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                },
             }}>
             <Tabs.Screen
-                name="index"
+                name="allergens" // allergens
                 options={{
                     tabBarLabel: ({ focused }) => (
                         <View
                             style={{
+                                position: 'absolute',
+                                bottom: 35,
                                 backgroundColor: focused ? '#009D7C' : 'transparent',
                                 paddingVertical: 8,
                                 paddingHorizontal: 16,
                                 borderRadius: 12,
                             }}
                         >
-                            <Text> Allergens </Text>
+                            <Text
+                                style={{
+                                    color: focused ? '#fff' : '#000',
+                                    fontWeight: focused ? 'bold' : 'normal',
+                                    fontSize: 14,
+                                }}
+                            > Allergens </Text>
                         </View>
                     ),
                     tabBarIcon: () => null,
                 }}
             />
             <Tabs.Screen
-                name="home"
+                name="index" // scan
+
                 options={{
-                    title: 'Home',
-                    tabBarIcon: ({ color }) => <MaterialIcons size={28} name="camera" color={color} />,
+                    title: 'Scan',
+                    tabBarLabel: ({ focused }) => (
+                        <View
+                            style={{
+                                position: 'absolute',
+                                bottom: 35,
+                                backgroundColor: focused ? '#009D7C' : 'transparent',
+                                paddingVertical: 8,
+                                paddingHorizontal: 16,
+                                borderRadius: 12,
+                            }}
+                        >
+                            <Text
+                                style={{
+                                    color: focused ? '#fff' : '#000',
+                                    fontWeight: focused ? 'bold' : 'normal',
+                                    fontSize: 14,
+                                }}
+                            > Scan </Text>
+                        </View>
+                    ),
+                    tabBarIcon: () => null,
                 }}
             />
-            <Tabs.Screen
-                name="explore"
-                options={{
-                    title: 'Explore',
-                    tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-                }}
-            />
+            {/*<Tabs.Screen*/}
+            {/*    name="explore" // allergens*/}
+            {/*    options={{*/}
+            {/*        tabBarLabel: ({ focused }) => (*/}
+            {/*            <View*/}
+            {/*                style={{*/}
+            {/*                    position: 'absolute',*/}
+            {/*                    bottom: 14,*/}
+            {/*                    backgroundColor: focused ? '#009D7C' : 'transparent',*/}
+            {/*                    paddingVertical: 8,*/}
+            {/*                    paddingHorizontal: 16,*/}
+            {/*                    borderRadius: 12,*/}
+            {/*                }}*/}
+            {/*            >*/}
+            {/*                <Text*/}
+            {/*                    style={{*/}
+            {/*                        color: focused ? '#fff' : '#000',*/}
+            {/*                        fontWeight: focused ? 'bold' : 'normal',*/}
+            {/*                        fontSize: 14,*/}
+            {/*                    }}*/}
+            {/*                > Explore </Text>*/}
+            {/*            </View>*/}
+            {/*        ),*/}
+            {/*        tabBarIcon: () => null,*/}
+            {/*    }}*/}
+            {/*/>*/}
         </Tabs>
     );
 }

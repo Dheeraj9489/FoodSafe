@@ -9,3 +9,4 @@ foodsafe/
 *.png
 *.ipynb
 *.mp3
+node_modules

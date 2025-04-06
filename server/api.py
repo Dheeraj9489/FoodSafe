@@ -66,7 +66,7 @@ def remove_allergy(item: str):
         save_allergies()
         return {"message": f"Removed individual allergy {item}"}
     for category, allergens in data["categories"].items():
-        if item in allergens:    
+        if item in allergens:
             raise HTTPException(status_code=400, detail=f"'{item}' is part of category '{category}'. Remove whole category instead.")
     raise HTTPException(status_code=404, detail="Allergy not found")
 
@@ -96,7 +96,7 @@ async def upload_image(file: UploadFile = File(...)):
     global last_food_name
     image_bytes = await file.read()
     result = gemini_generation(image_bytes, allergens=get_all_allergens())
-    last_maybe_allergies = result['maybe']
+    last_maybe_allergies = result['maybe'] if 'maybe' in result.keys() else []
     last_food_name = result['food_name']
     return JSONResponse(content=result)
 
@@ -105,7 +105,7 @@ async def upload_image(file: UploadFile = File(...)):
 @app.post("/translate/{language}")
 def text_to_speech(language: str):
     # translation to specified language
-    text = f"Does this {last_food_name} contain any of these: {" ,".join(last_maybe_allergies)}."
+    text = f"Does this {last_food_name} contain any of these: {', '.join(last_maybe_allergies)}"
     supported_langs = GoogleTranslator().get_supported_languages(True)
     translation = GoogleTranslator(source='en', target=language).translate(text)
     print("translation done")
@@ -118,7 +118,7 @@ def text_to_speech(language: str):
     # Build the voice request, select the language code ("en-US") and the ssml
     # voice gender ("neutral")
     voice = texttospeech.VoiceSelectionParams(
-        language_code=supported_langs[language], ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
+        language_code=language, ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
     )
 
     # Select the type of audio file you want returned
