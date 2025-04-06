@@ -1,0 +1,12 @@
+*/__pycache__/
+server/data/*
+server/data
+foodsafe/
+.env
+.idea/
+*.jpg
+*.jpeg
+*.png
+*.ipynb
+*.mp3
+node_modules

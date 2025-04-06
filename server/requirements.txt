@@ -1,0 +1,7 @@
+fastapi
+python-multipart
+fastapi[standard]
+Pillow
+google-genai
+deep-translator
+google-cloud-texttospeech
