@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 
 export default function WelcomeScreen() {
     const router = useRouter();
-
+    // console.log('WelcomeScreen');
     return (
         <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <Text>Welcome Message</Text>

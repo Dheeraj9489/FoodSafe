@@ -1,11 +1,15 @@
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { uploadImage } from '@/constants/api'; // Adjust the import path as necessary
 //import { background } from '@/constants/Colors';
 
 export default function HomeScreen() {
     const [facing, setFacing] = useState<CameraType>('back');
     const [permission, requestPermission] = useCameraPermissions();
+
+    const [photoUri, setPhotoUri] = useState<string | null>(null);
+    const cameraRef = useRef<CameraView>(null);
 
     if (!permission) {
         // Camera permissions are still loading.
@@ -22,21 +26,45 @@ export default function HomeScreen() {
         );
     }
 
-    function toggleCameraFacing() {
-        setFacing(current => (current === 'back' ? 'front' : 'back'));
+    // function toggleCameraFacing() {
+    //     setFacing(current => (current === 'back' ? 'front' : 'back'));
+    // }
+    console.log("Works");
+
+    const takePicture = async () => {
+        console.log('Taking picture...');
+        if (cameraRef.current) {
+            const photo = await cameraRef.current.takePictureAsync();
+            if (!photo) {
+                console.error('Failed to take picture');
+                return;
+            }
+            console.log('Photo URI:', photo.uri);
+
+            try {
+                const result = await uploadImage(photo.uri);
+                console.log('Upload result:', result);
+                // You can now use the returned JSON (e.g., display a message or store info)
+            } catch (error) {
+                console.error('Upload failed:', error);
+            }
+            console.log('Reached');
+        } else {
+            console.log('Camera ref is null');
+        }
     }
 
     return (
         <View style={styles.container}>
-            <CameraView style={styles.camera} facing={facing}>
+            <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
                 <View style={styles.topRightCorner} />
                 <View style={styles.bottomLeftCorner} />
                 <View style={styles.topLeftCorner} />
                 <View style={styles.bottomRightCorner} />
                 {/*<View style = {styles.footer} />*/}
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-                        <Text style={styles.text}>Flip Camera</Text>
+                    <TouchableOpacity style={styles.button} onPress={takePicture}>
+                        <Text style={styles.text}>Take Photo</Text>
                     </TouchableOpacity>
                 </View>
             </CameraView>
