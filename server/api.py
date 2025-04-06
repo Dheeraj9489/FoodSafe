@@ -66,7 +66,7 @@ def remove_allergy(item: str):
         save_allergies()
         return {"message": f"Removed individual allergy {item}"}
     for category, allergens in data["categories"].items():
-        if item in allergens:    
+        if item in allergens:
             raise HTTPException(status_code=400, detail=f"'{item}' is part of category '{category}'. Remove whole category instead.")
     raise HTTPException(status_code=404, detail="Allergy not found")
 
@@ -105,7 +105,7 @@ async def upload_image(file: UploadFile = File(...)):
 @app.post("/translate/{language}")
 def text_to_speech(language: str):
     # translation to specified language
-    text = f"Does this {last_food_name} contain any of these: {" ,".join(last_maybe_allergies)}."
+    text = f"Does this {last_food_name} contain any of these: {', '.join(last_maybe_allergies)}"
     supported_langs = GoogleTranslator().get_supported_languages(True)
     translation = GoogleTranslator(source='en', target=language).translate(text)
     print("translation done")
