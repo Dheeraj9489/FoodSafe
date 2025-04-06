@@ -36,7 +36,7 @@ def gemini_generation(image, allergens):
     
     client = genai.Client(api_key=os.getenv("GEMINI_KEY"))
     response = client.models.generate_content(
-        model="gemini-2.0-flash-lite",
+        model="gemini-2.0-flash",
         contents=[
             types.Part.from_text(text=prompt),
             types.Part.from_bytes(data=byte_string, mime_type="image/jpeg")

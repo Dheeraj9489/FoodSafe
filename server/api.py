@@ -96,7 +96,7 @@ async def upload_image(file: UploadFile = File(...)):
     global last_food_name
     image_bytes = await file.read()
     result = gemini_generation(image_bytes, allergens=get_all_allergens())
-    last_maybe_allergies = result['maybe']
+    last_maybe_allergies = result['maybe'] if 'maybe' in result.keys() else []
     last_food_name = result['food_name']
     return JSONResponse(content=result)
 
